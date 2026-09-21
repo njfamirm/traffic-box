@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "traffic-box"
+version = "0.1.0"
+description = "Transparent policy-based routing manager and sing-box GUI launcher"
+readme = "README.md"
+authors = [{ name = "nexim" }]
+requires-python = ">=3.10"
+dependencies = [
+    "PyGObject>=3.42.0",
+]
+
+[project.scripts]
+traffic-box = "traffic_box.cli:main"
+traffic-box-gui = "traffic_box.gui:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

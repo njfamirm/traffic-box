@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.venv/
+env/
+
+# Local Traffic-Box Data & Secrets (DO NOT COMMIT)
+profiles/*.json
+!profiles/.gitkeep
+sub_url.txt
+secrets/
+.env
+
+# Logs & Runtime
+*.log
+.singbox_cache/
