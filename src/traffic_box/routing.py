@@ -39,8 +39,6 @@ def load_rules_config(path: Path = None) -> dict:
                 "mahakacc.mahaksoft.com",
                 "swissplus.co",
                 "kavenegar.com",
-                "github.com",
-                "githubusercontent.com",
             ],
             "direct_ip_cidrs": [
                 "195.88.208.203/32"
