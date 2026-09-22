@@ -12,13 +12,27 @@ def sanitize_filename(name: str) -> str:
     return clean or "node"
 
 
-def parse_vless(uri: str) -> tuple[str, dict]:
+def parse_vless(uri: str) -> tuple[str, dict] | None:
     p = urllib.parse.urlparse(uri)
-    raw_name = urllib.parse.unquote(p.fragment) if p.fragment else p.hostname
+    if not p.netloc or "@" not in p.netloc:
+        return None
+
     user_info = p.netloc.split("@")[0]
     host_port = p.netloc.split("@")[1]
-    host, port = host_port.split(":")
-    port = int(port)
+    if ":" not in host_port:
+        return None
+
+    host, port_str = host_port.split(":")
+    try:
+        port = int(port_str)
+    except ValueError:
+        return None
+
+    # Filter out dummy / announcement nodes (e.g., port 1 or data usage counters)
+    if port <= 10 or host.lower() == "onyxnet.ir":
+        return None
+
+    raw_name = urllib.parse.unquote(p.fragment) if p.fragment else p.hostname
     qs = {k: v[0] for k, v in urllib.parse.parse_qs(p.query).items()}
 
     tag = raw_name.strip()
@@ -52,12 +66,13 @@ def parse_vless(uri: str) -> tuple[str, dict]:
 
     sec = qs.get("security", "")
     if sec == "reality":
+        fp = qs.get("fp", "chrome")
         outbound["tls"] = {
             "enabled": True,
             "server_name": qs.get("sni") or qs.get("host", host),
             "utls": {
                 "enabled": True,
-                "fingerprint": qs.get("fp", "ios"),
+                "fingerprint": fp,
             },
             "reality": {
                 "enabled": True,
@@ -67,12 +82,13 @@ def parse_vless(uri: str) -> tuple[str, dict]:
         if qs.get("sid"):
             outbound["tls"]["reality"]["short_id"] = qs["sid"]
     elif sec == "tls":
+        fp = qs.get("fp", "chrome")
         outbound["tls"] = {
             "enabled": True,
             "server_name": qs.get("sni") or qs.get("host", host),
             "utls": {
                 "enabled": True,
-                "fingerprint": qs.get("fp", "chrome"),
+                "fingerprint": fp,
             },
         }
         if qs.get("alpn"):

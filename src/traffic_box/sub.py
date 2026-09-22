@@ -3,6 +3,7 @@
 import base64
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.parse
@@ -12,7 +13,7 @@ from pathlib import Path
 from traffic_box.generator import build_auto_config, build_single_node_config
 from traffic_box.parser import parse_uri, sanitize_filename
 
-DEFAULT_SUB_URL = "https://sub.menulu.ir:8000/sub/bmpmYW1pcm0sMTc4OTk4NzQ3MAqnVdognxBd"
+DEFAULT_SUB_URL = os.environ.get("TRAFFIC_BOX_SUB_URL", "")
 
 
 def get_project_root() -> Path:
@@ -68,6 +69,10 @@ def update_subscription(url: str = None, log_fn=print) -> list[Path]:
         else:
             url = DEFAULT_SUB_URL
 
+    if not url:
+        log_fn("Error: No subscription URL configured. Please specify a URL.")
+        return []
+
     sub_file.write_text(url)
     log_fn(f"Fetching subscription: {url}")
 
@@ -89,6 +94,15 @@ def update_subscription(url: str = None, log_fn=print) -> list[Path]:
         log_fn(f"  • {name} ({ob['server']}:{ob['server_port']})")
 
     profiles_dir = get_profiles_dir()
+
+    # Clean up old generated numbered profiles to prevent stale configs
+    for old_file in profiles_dir.glob("*.json"):
+        if re.match(r"^\d\d-", old_file.name):
+            try:
+                old_file.unlink()
+            except OSError:
+                pass
+
     saved_paths = []
 
     # 1. Combined Auto / Failover profile
@@ -113,5 +127,5 @@ def update_subscription(url: str = None, log_fn=print) -> list[Path]:
         saved_paths.append(node_file)
         log_fn(f"Saved: {clean_name}")
 
-    log_fn("Subscription update completed successfully.")
+    log_fn(f"Subscription update completed: {len(saved_paths)} profiles generated.")
     return saved_paths
