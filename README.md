@@ -70,3 +70,14 @@ traffic-box sub
 ```bash
 traffic-box gui
 ```
+
+---
+
+## 🗺️ Roadmap & Future Plans
+
+- [ ] **Cross-Platform Rewrite with Flutter**:
+  - Re-architect core parsing, config generation, and sing-box engine integration into a single Flutter codebase.
+  - **Android Support**: Native `android.net.VpnService` integration for rootless APK distribution.
+  - **Desktop Unified Builds**: Single-command builds for Windows (`.exe`), macOS (`.dmg`), and Linux (`AppImage`/`.deb`).
+  - **CI/CD Pipeline**: Automated GitHub Actions releases for all platforms.
+
